@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Exclude DataStore preferences from backup -->
+    <exclude domain="sharedpref" path="moi_band_prefs.preferences_pb" />
+    
+    <!-- Exclude downloaded music files (too large) -->
+    <exclude domain="file" path="music/" />
+    <exclude domain="file" path="downloads/" />
+</full-backup-content>

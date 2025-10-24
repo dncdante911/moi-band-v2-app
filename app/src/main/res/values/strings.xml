@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Master of Illusion</string>
+    
+    <!-- Auth -->
+    <string name="login_title">Вход</string>
+    <string name="register_title">Регистрация</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="password_confirm">Подтвердите пароль</string>
+    <string name="login_button">ВОЙТИ</string>
+    <string name="register_button">ЗАРЕГИСТРИРОВАТЬСЯ</string>
+    <string name="no_account">Нет аккаунта? Зарегистрируйтесь</string>
+    <string name="have_account">Уже есть аккаунт? Войдите</string>
+    
+    <!-- Navigation -->
+    <string name="nav_albums">Альбомы</string>
+    <string name="nav_news">Новости</string>
+    <string name="nav_gallery">Галерея</string>
+    <string name="nav_chat">Чат</string>
+    <string name="nav_profile">Профиль</string>
+    
+    <!-- Albums -->
+    <string name="albums_title">📀 АЛЬБОМЫ</string>
+    <string name="track_count">%d треков</string>
+    <string name="album_released">📅 %s</string>
+    
+    <!-- Player -->
+    <string name="play">Играть</string>
+    <string name="pause">Пауза</string>
+    <string name="next">Следующий</string>
+    <string name="previous">Предыдущий</string>
+    <string name="shuffle">Перемешать</string>
+    <string name="repeat">Повтор</string>
+    
+    <!-- Errors -->
+    <string name="error_network">Ошибка сети</string>
+    <string name="error_unknown">Неизвестная ошибка</string>
+    <string name="error_login">Ошибка входа</string>
+    <string name="error_register">Ошибка регистрации</string>
+    
+    <!-- Profile -->
+    <string name="logout">ВЫЙТИ</string>
+    <string name="theme_power_metal">⚔️ Power Metal</string>
+    <string name="theme_heavy_metal">🤘 Heavy Metal</string>
+    <string name="theme_punk_rock">🎸 Punk Rock</string>
+</resources>

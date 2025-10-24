@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Don't backup sensitive data -->
+        <exclude domain="sharedpref" path="moi_band_prefs.preferences_pb" />
+        <exclude domain="file" path="music/" />
+        <exclude domain="file" path="downloads/" />
+    </cloud-backup>
+    
+    <device-transfer>
+        <!-- Transfer user preferences -->
+        <include domain="sharedpref" path="moi_band_prefs.preferences_pb" />
+    </device-transfer>
+</data-extraction-rules>
