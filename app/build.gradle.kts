@@ -36,7 +36,7 @@ android {
             // buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.X:80/api/v1\"")
             // buildConfigField("String", "BASE_URL", "\"http://192.168.1.X\"")
         }
-        
+
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -121,11 +121,17 @@ dependencies {
     // Image Loading - Coil
     implementation("io.coil-kt:coil-compose:2.5.0")
 
-    // Media3 ExoPlayer (для музыки)
+    // Media3 ExoPlayer (для музыки) - ПОЛНАЯ ПОДДЕРЖКА
     implementation("androidx.media3:media3-exoplayer:1.2.0")
     implementation("androidx.media3:media3-exoplayer-dash:1.2.0")
     implementation("androidx.media3:media3-ui:1.2.0")
     implementation("androidx.media3:media3-session:1.2.0")
+
+    // MediaSession для уведомлений в шторке и экране блокировки
+    implementation("androidx.media:media:1.6.0")
+
+    // Работа с уведомлениями на экране блокировки
+    implementation("androidx.core:core:1.12.0")
 
     // Accompanist (дополнительные Compose утилиты)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
