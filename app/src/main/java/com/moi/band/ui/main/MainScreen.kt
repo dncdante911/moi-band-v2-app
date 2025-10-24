@@ -29,14 +29,25 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val scope = rememberCoroutineScope()
-    
+
     val authViewModel: com.moi.band.ui.auth.AuthViewModel = hiltViewModel()
+    val playerViewModel: com.moi.band.player.PlayerViewModel = hiltViewModel()
+
     var isLoggedIn by remember { mutableStateOf(false) }
-    
+    var showFullPlayer by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         isLoggedIn = authViewModel.isLoggedIn()
     }
-    
+
+    // Диалог полного плеера
+    if (showFullPlayer) {
+        com.moi.band.player.FullPlayerScreen(
+            viewModel = playerViewModel,
+            onDismiss = { showFullPlayer = false }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,8 +65,13 @@ fun MainScreen(
         },
         bottomBar = {
             Column {
-                com.moi.band.player.MiniPlayer()
-                
+                // Mini Player
+                com.moi.band.player.MiniPlayer(
+                    viewModel = playerViewModel,
+                    onExpandClick = { showFullPlayer = true }
+                )
+
+                // Navigation Bar
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                 ) {
@@ -69,7 +85,7 @@ fun MainScreen(
                                     onNavigateToLogin()
                                     return@NavigationBarItem
                                 }
-                                
+
                                 if (currentRoute != item.route) {
                                     navController.navigate(item.route) {
                                         popUpTo(navController.graph.startDestinationId) {
@@ -99,7 +115,7 @@ fun MainScreen(
             composable("news") {
                 NewsScreen()
             }
-            
+
             composable("albums") {
                 AlbumsScreen(
                     onAlbumClick = { albumId ->
@@ -107,7 +123,7 @@ fun MainScreen(
                     }
                 )
             }
-            
+
             composable(
                 route = "album_detail/{albumId}",
                 arguments = listOf(
@@ -115,49 +131,39 @@ fun MainScreen(
                 )
             ) { backStackEntry ->
                 val albumId = backStackEntry.arguments?.getInt("albumId") ?: 0
-                val playerViewModel: com.moi.band.player.PlayerViewModel = hiltViewModel()
-                
+
                 AlbumDetailScreen(
                     albumId = albumId,
                     onBack = { navController.popBackStack() },
-                    onTrackClick = { track ->
+                    onTrackClick = { track, allTracks ->
                         android.util.Log.d("MainScreen", "Track clicked: ${track.title}")
-                        android.util.Log.d("MainScreen", "Original audioUrl from API: ${track.audioUrl}")
-                        
+                        android.util.Log.d("MainScreen", "Original audioUrl: ${track.audioUrl}")
+
                         // Формируем правильный URL
                         val fullAudioUrl = when {
-                            // Уже полный URL (начинается с http:// или https://)
-                            track.audioUrl.startsWith("http://") || track.audioUrl.startsWith("https://") -> {
-                                // Заменяем старый домен на новый если нужно
+                            track.audioUrl.startsWith("http://") ||
+                                    track.audioUrl.startsWith("https://") -> {
                                 track.audioUrl
-                                    .replace("lovix.top", "moi-band.com.ua")
-                                    .replace("http://", "https://")
                             }
-                            // Относительный путь начинается с /uploads
-                            track.audioUrl.startsWith("/uploads") -> {
-                                "https://moi-band.com.ua${track.audioUrl}"
+                            track.audioUrl.startsWith("/") -> {
+                                "${BuildConfig.BASE_URL}${track.audioUrl}"
                             }
-                            // Относительный путь БЕЗ слеша
-                            track.audioUrl.startsWith("uploads") -> {
-                                "https://moi-band.com.ua/${track.audioUrl}"
-                            }
-                            // Любой другой относительный путь
                             else -> {
-                                "https://moi-band.com.ua/uploads/full/${track.audioUrl}"
+                                "${BuildConfig.BASE_URL}/${track.audioUrl}"
                             }
                         }
-                        
+
                         android.util.Log.d("MainScreen", "Full audio URL: $fullAudioUrl")
-                        
-                        playerViewModel.playTrack(track, fullAudioUrl)
+
+                        playerViewModel.playTrack(track, fullAudioUrl, allTracks)
                     }
                 )
             }
-            
+
             composable("gallery") {
                 GalleryScreen()
             }
-            
+
             composable("chat") {
                 if (isLoggedIn) {
                     ChatScreen()
@@ -168,7 +174,7 @@ fun MainScreen(
                     )
                 }
             }
-            
+
             composable("profile") {
                 if (isLoggedIn) {
                     ProfileScreen(

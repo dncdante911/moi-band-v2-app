@@ -32,14 +32,14 @@ fun AlbumDetailScreen(
     albumId: Int,
     viewModel: AlbumViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onTrackClick: (Track) -> Unit
+    onTrackClick: (Track, List<Track>) -> Unit
 ) {
     val albumDetailState by viewModel.albumDetailState.collectAsState()
-    
+
     LaunchedEffect(albumId) {
         viewModel.loadAlbumDetail(albumId)
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,10 +65,10 @@ fun AlbumDetailScreen(
                     )
                 }
             }
-            
+
             is Resource.Success -> {
                 val album = (albumDetailState as Resource.Success<AlbumDetail>).data
-                
+
                 album?.let {
                     AlbumDetailContent(
                         album = it,
@@ -77,7 +77,7 @@ fun AlbumDetailScreen(
                     )
                 }
             }
-            
+
             is Resource.Error -> {
                 Box(
                     modifier = Modifier
@@ -92,16 +92,16 @@ fun AlbumDetailScreen(
                             text = "❌ ${(albumDetailState as Resource.Error).message}",
                             color = MaterialTheme.colorScheme.error
                         )
-                        
+
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         Button(onClick = { viewModel.loadAlbumDetail(albumId) }) {
                             Text("Повторить")
                         }
                     }
                 }
             }
-            
+
             null -> {}
         }
     }
@@ -110,7 +110,7 @@ fun AlbumDetailScreen(
 @Composable
 fun AlbumDetailContent(
     album: AlbumDetail,
-    onTrackClick: (Track) -> Unit,
+    onTrackClick: (Track, List<Track>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -120,9 +120,16 @@ fun AlbumDetailContent(
     ) {
         // Album Header
         item {
-            AlbumHeader(album)
+            AlbumHeader(
+                album = album,
+                onPlayAll = {
+                    if (album.tracks.isNotEmpty()) {
+                        onTrackClick(album.tracks.first(), album.tracks)
+                    }
+                }
+            )
         }
-        
+
         // Tracks Title
         item {
             Row(
@@ -135,7 +142,7 @@ fun AlbumDetailContent(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
-                
+
                 Text(
                     text = "${album.tracks.size} треков",
                     style = MaterialTheme.typography.bodyMedium,
@@ -143,20 +150,23 @@ fun AlbumDetailContent(
                 )
             }
         }
-        
+
         // Tracks List
         itemsIndexed(album.tracks) { index, track ->
             TrackItem(
                 track = track,
                 index = index + 1,
-                onClick = { onTrackClick(track) }
+                onClick = { onTrackClick(track, album.tracks) }
             )
         }
     }
 }
 
 @Composable
-fun AlbumHeader(album: AlbumDetail) {
+fun AlbumHeader(
+    album: AlbumDetail,
+    onPlayAll: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -171,18 +181,18 @@ fun AlbumHeader(album: AlbumDetail) {
                 .clip(RoundedCornerShape(16.dp)),
             contentScale = ContentScale.Crop
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         // Album Title
         Text(
             text = album.title,
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Album Info
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -195,7 +205,7 @@ fun AlbumHeader(album: AlbumDetail) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             if (album.totalDurationFormatted != null) {
                 Text(
                     text = "⏱️ ${album.totalDurationFormatted}",
@@ -204,23 +214,23 @@ fun AlbumHeader(album: AlbumDetail) {
                 )
             }
         }
-        
+
         // Description
         if (!album.description.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = album.description,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         // Play All Button
         Button(
-            onClick = { /* TODO: Play all tracks */ },
+            onClick = onPlayAll,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
@@ -268,9 +278,9 @@ fun TrackItem(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             // Track Info
             Column(
                 modifier = Modifier.weight(1f)
@@ -282,9 +292,9 @@ fun TrackItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -295,7 +305,7 @@ fun TrackItem(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    
+
                     if (track.views > 0) {
                         Text(
                             text = "👁️ ${track.views}",
@@ -305,7 +315,7 @@ fun TrackItem(
                     }
                 }
             }
-            
+
             // Play Icon
             IconButton(onClick = onClick) {
                 Icon(

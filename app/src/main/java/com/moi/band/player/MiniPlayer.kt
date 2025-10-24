@@ -26,14 +26,15 @@ import com.moi.band.BuildConfig
 @Composable
 fun MiniPlayer(
     viewModel: PlayerViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onExpandClick: () -> Unit = {}
 ) {
     val currentTrack by viewModel.currentTrack.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val showPlayer by viewModel.showPlayer.collectAsState()
-    
+
     if (!showPlayer || currentTrack == null) return
-    
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -47,6 +48,7 @@ fun MiniPlayer(
         Row(
             modifier = Modifier
                 .fillMaxSize()
+                .clickable(onClick = onExpandClick)
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -64,9 +66,9 @@ fun MiniPlayer(
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentScale = ContentScale.Crop
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             // Track Info
             Column(
                 modifier = Modifier.weight(1f)
@@ -78,7 +80,7 @@ fun MiniPlayer(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
                 if (currentTrack?.albumTitle != null) {
                     Text(
                         text = currentTrack!!.albumTitle!!,
@@ -89,7 +91,7 @@ fun MiniPlayer(
                     )
                 }
             }
-            
+
             // Play/Pause Button
             IconButton(
                 onClick = { viewModel.togglePlayPause() }
@@ -101,7 +103,7 @@ fun MiniPlayer(
                     modifier = Modifier.size(32.dp)
                 )
             }
-            
+
             // Close Button
             IconButton(
                 onClick = { viewModel.stop() }
