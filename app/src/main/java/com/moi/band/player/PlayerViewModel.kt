@@ -2,6 +2,8 @@ package com.moi.band.player
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.moi.band.data.model.Track
@@ -56,17 +58,35 @@ class PlayerViewModel @Inject constructor(
         // Запускаем обновление прогресса
         startProgressUpdates()
 
-        // Запускаем service
+        // Запрашиваем разрешение на уведомления (Android 13+)
+        requestNotificationPermission()
+
+        // Формируем полный URL для обложки
+        val fullCoverUrl = when {
+            track.coverImage.isNullOrEmpty() -> null
+            track.coverImage!!.startsWith("http") -> track.coverImage
+            track.coverImage!!.startsWith("/") -> "${com.moi.band.BuildConfig.BASE_URL}${track.coverImage}"
+            else -> "${com.moi.band.BuildConfig.BASE_URL}/${track.coverImage}"
+        }
+
+        android.util.Log.d("PlayerViewModel", "Cover URL: $fullCoverUrl")
+
+        // Запускаем service с полной информацией
         val intent = Intent(context, MusicPlayerService::class.java).apply {
             action = MusicPlayerService.ACTION_PLAY
             putExtra(MusicPlayerService.EXTRA_TRACK_URL, fullAudioUrl)
             putExtra(MusicPlayerService.EXTRA_TRACK_TITLE, track.title)
             putExtra(MusicPlayerService.EXTRA_ALBUM_TITLE, track.albumTitle ?: "")
+            putExtra(MusicPlayerService.EXTRA_TRACK_COVER, fullCoverUrl)
         }
 
         try {
-            context.startForegroundService(intent)
-            android.util.Log.d("PlayerViewModel", "Service started successfully")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+            android.util.Log.d("PlayerViewModel", "Service started successfully with cover")
         } catch (e: Exception) {
             android.util.Log.e("PlayerViewModel", "Failed to start service", e)
         }
@@ -229,5 +249,28 @@ class PlayerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         stopProgressUpdates()
+    }
+
+    /**
+     * Запрос разрешения на уведомления (Android 13+)
+     */
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            try {
+                val permission = android.Manifest.permission.POST_NOTIFICATIONS
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    permission
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+                if (!hasPermission) {
+                    android.util.Log.d("PlayerViewModel", "Notification permission not granted")
+                } else {
+                    android.util.Log.d("PlayerViewModel", "Notification permission granted")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("PlayerViewModel", "Error checking notification permission", e)
+            }
+        }
     }
 }

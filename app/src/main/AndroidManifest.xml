@@ -2,21 +2,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- PERMISSIONS -->
+    <!-- INTERNET И СЕТЬ -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- FOREGROUND SERVICE - обязательно для music playback -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- УВЕДОМЛЕНИЯ - обязательно для Android 13+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
-    <!-- Storage для оффлайн скачивания (Android 9 и ниже) -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+
+    <!-- AUDIO -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- STORAGE (если нужно) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    
-    <!-- Для Android 13+ медиа разрешения -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
     <application
@@ -30,8 +33,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MoiBand"
         android:usesCleartextTraffic="false"
-        tools:targetApi="31">
-        
+        tools:targetApi="34">
+
         <!-- MAIN ACTIVITY -->
         <activity
             android:name=".MainActivity"
@@ -39,18 +42,20 @@
             android:theme="@style/Theme.MoiBand"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|keyboardHidden">
-            
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- MUSIC PLAYER SERVICE -->
+        <!-- MUSIC PLAYER SERVICE - ГЛАВНЫЙ СЕРВИС -->
         <service
             android:name=".player.MusicPlayerService"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback">
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="false"
+            tools:targetApi="31">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
